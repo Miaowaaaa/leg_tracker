@@ -13,6 +13,7 @@ Usage
 - $ cd [your catkin_workspace]
 - $ catkin_make
 - $ roslaunch leg_tracker joint_leg_tracker.launch
+- $ roslaunch leg_tracker leg_tracker_autolabor.launch #For run a real robot tracking on Autolabor Por1. 
 
 
 Demos
@@ -36,6 +37,8 @@ Published topics
     - the positions and velocities of the tracked people as a PersonArray message (see: leg_tracker/msg/PersonArray.msg for the message specification).
 - /visualization_marker
     - markers for the tracked people, other tracked objects and the centroids of the detected clusters.
+- /cmd_vel
+    - the velocity message for controlling Autolabor robot
 
 
 Important parameters
