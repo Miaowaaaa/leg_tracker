@@ -2,6 +2,9 @@ Leg Tracker
 ===========
 ![ROS](https://img.shields.io/badge/ROS-Kinetic-brightgreen.svg)  ![OS](https://img.shields.io/badge/OS-Ubuntu16.04-ff69b4.svg) ![OpenCV](https://img.shields.io/badge/OpenCV-3.4-blue.svg)
 
+Source
+-------------------
+This package is forked from https://github.com/angusleigh/leg_tracker
 
 Usage
 -------------------
@@ -14,13 +17,6 @@ Usage
 - $ catkin_make
 - $ roslaunch leg_tracker joint_leg_tracker.launch
 - $ roslaunch leg_tracker leg_tracker_autolabor.launch #For run a real robot tracking on Autolabor Por1. 
-
-
-Demos
--------------------
-- try $ roslaunch leg_tracker demo_stationary_simple_environment.launch to see a demo of it working on a stationary robot.
-- there are a bunch more demo launch files in the /launch directory.
-- video: [youtu.be/F2Qx3O5AyBs](https://www.youtube.com/watch?v=F2Qx3O5AyBs), which also includes a brief explaination of the method.
 
 
 Subscribed topics
