@@ -2,7 +2,7 @@
 
 import rospy
 
-from leg_tracker.msg import Person,PersonArray
+from leg_follower.msg import Person,PersonArray
 import numpy as np
 import math
 from geometry_msgs.msg import Twist,PointStamped
@@ -20,9 +20,12 @@ class PeopleTracker:
         self.base_frame = rospy.get_param("base_frame","/base_footprint")
         self.laser_frame = rospy.get_param("laser_frame","/laser")
         self.velocity_topic = rospy.get_param("velocity_topic","/cmd_vel")
-        self.isTracked = False # flag: it respresent whether the tracker's ID is identify
-        self.trackID = -1 # tracker's ID initialized with -1
-
+        self.max_search_radius = rospy.get_param("max_search_radius",0.5)
+        self.listener = tf.TransformListener()
+        self.isTracked = False # flag: it respresent whether the tracker's ID is identified
+        self.trackID = -1      # tracker's ID initialized with -1
+        self.isFind = False    # flag: it respresent whether the pre-tracker is found
+        self.pose = PointStamped()
         #ROS Publisher
         self.velocity_pub = rospy.Publisher(self.velocity_topic,Twist,queue_size=10)
 
@@ -49,31 +52,54 @@ class PeopleTracker:
                 print "No people detected!"
             return
         else:
+            print self.trackID
+            self.isFind = False
             for person in person_array_msg.people:
                 if person.id == self.trackID:
                     pose.point.x = person.pose.position.x
                     pose.point.y = person.pose.position.y
-        dist = (pose.point.y ** 2 + pose.point.x ** 2)** 1./2.
-        print "dist is :", dist
+                    self.isFind = True
+                    self.pose.point.x = pose.point.x
+                    self.pose.point.y = pose.point.y
+                    break
+            if not self.isFind:
+                for person in person_array_msg.people:
+                    d = ((person.pose.point.x - self.pose.point.x)**2 + (person.pose.point.y - self.pose.point.y)**2)** (1./2.)
+                    if d < self.max_search_radius:
+                        pose.point.x = person.pose.position.x
+                        pose.point.y = person.pose.position.y
+                        self.isFind = True
+                        self.pose.point.x = pose.point.x
+                        self.pose.point.y = pose.point.y
+                        self.trackID = person.id
+                        break
         velocity = Twist()
-        if(dist > 0.3 and dist < 0.5):
+        if not self.isFind:
+            velocity.linear.x = 0.0
+            velocity.angular.z = 0.0
+            self.velocity_pub.publish(velocity)
+            return
+        dist = (pose.point.y ** 2 + pose.point.x ** 2)** 1./2.
+        if(dist < 0.5):
             velocity.linear.x = 0.0
             velocity.angular.z = 0.0
             self.velocity_pub.publish(velocity)
         else:
-            dist_away = -0.5
+            dist_away = -0.7
             theta = math.atan2(pose.point.y,pose.point.x)
             dist_x = dist_away * math.cos(theta)
             dist_y = dist_away * math.sin(theta)
-            print "dist:",dist_x, dist_y
             pose.point.x = pose.point.x + dist_x
             pose.point.y = pose.point.y + dist_y
-            velocity.linear.x = 0.1 + 0.2 * math.sqrt(pose.point.x ** 2 + pose.point.y ** 2)
+            velocity.linear.x = 0.2 * math.sqrt(pose.point.x ** 2 + pose.point.y ** 2)
             if theta < 0.32 and theta > -0.32:
                 velocity.angular.z = 0
+            elif theta >= 0.32:
+                velocity.linear.x = 0.0
+                velocity.angular.z = 0.2# * theta #math.atan2(pose.point.x,pose.point.y)
             else:
-                velocity.angular.z = 4 * theta #math.atan2(pose.point.x,pose.point.y)
-            print "vel: " ,velocity.linear.x, velocity.angular.z
+                velocity.linear.x = 0.0
+                velocity.angular.z = -0.2# * theta
             self.velocity_pub.publish(velocity)
 
 if __name__ == '__main__':
