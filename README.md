@@ -18,6 +18,9 @@ Usage
 - $ roslaunch leg_tracker joint_leg_tracker.launch
 - $ roslaunch leg_tracker leg_tracker_autolabor.launch #For run a real robot tracking on Autolabor Por1. 
 
+Recommend
+-------------------
+- down-sampling your laser frequency to 10hz/15hz may perform better.
 
 Subscribed topics
 -------------------
