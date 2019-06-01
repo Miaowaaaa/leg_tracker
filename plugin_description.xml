@@ -1,0 +1,9 @@
+<library path="lib/libmarker_list">    
+  <class name="leg_tracker/TrackerSelection"
+         type="rviz_markers_panel::PersonPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A Tool to pub a labelled navigation goal.
+    </description>
+  </class>
+</library>
